@@ -215,95 +215,107 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
     }
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 200,
-            floating: false,
-            pinned: true,
-            centerTitle: true,
-            flexibleSpace: FlexibleSpaceBar(
-              centerTitle: true,
-              title: const Text(
-                'Calculadora de IMC',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 2),
-                      blurRadius: 4,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Seção de Dados Pessoais
+                    _buildSectionHeader(
+                      'Dados Pessoais',
+                      Icons.person,
                     ),
-                  ],
-                ),
-              ),
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.primaryContainer,
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.monitor_weight,
-                    size: 80,
-                    color: Colors.white.withOpacity(0.3),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Seção de Dados Pessoais
-                      _buildSectionHeader(
-                        'Dados Pessoais',
-                        Icons.person,
+                    const SizedBox(height: 16),
+                    _buildInputCard(
+                      child: Column(
+                        children: [
+                          _buildTextField(
+                            controller: _heightController,
+                            label: 'Altura',
+                            suffix: 'cm',
+                            icon: Icons.height,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, insira sua altura';
+                              }
+                              final height = double.tryParse(value);
+                              if (height == null || height <= 0 || height > 300) {
+                                return 'Altura inválida';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _weightController,
+                            label: 'Peso Atual',
+                            suffix: 'kg',
+                            icon: Icons.scale,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, insira seu peso atual';
+                              }
+                              final weight = double.tryParse(value);
+                              if (weight == null || weight <= 0 || weight > 500) {
+                                return 'Peso inválido';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildTextField(
+                            controller: _ageController,
+                            label: 'Idade',
+                            suffix: 'anos',
+                            icon: Icons.cake,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, insira sua idade';
+                              }
+                              final age = int.tryParse(value);
+                              if (age == null || age <= 0 || age > 120) {
+                                return 'Idade inválida';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          _buildGenderSelector(),
+                        ],
                       ),
-                      const SizedBox(height: 16),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Seção de Objetivo de Peso
+                    _buildSectionHeader(
+                      'Objetivo de Peso',
+                      Icons.flag,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildGoalSelector(),
+                    const SizedBox(height: 16),
+                    if (_selectedGoal != null && _selectedGoal != WeightGoal.maintain) ...[
                       _buildInputCard(
                         child: Column(
                           children: [
                             _buildTextField(
-                              controller: _heightController,
-                              label: 'Altura',
-                              suffix: 'cm',
-                              icon: Icons.height,
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor, insira sua altura';
-                                }
-                                final height = double.tryParse(value);
-                                if (height == null || height <= 0 || height > 300) {
-                                  return 'Altura inválida';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              controller: _weightController,
-                              label: 'Peso Atual',
+                              controller: _targetWeightController,
+                              label: 'Peso Alvo',
                               suffix: 'kg',
-                              icon: Icons.scale,
+                              icon: Icons.track_changes,
                               keyboardType: TextInputType.number,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Por favor, insira seu peso atual';
+                                  return 'Por favor, insira seu peso alvo';
                                 }
                                 final weight = double.tryParse(value);
                                 if (weight == null || weight <= 0 || weight > 500) {
@@ -313,89 +325,34 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
                               },
                             ),
                             const SizedBox(height: 16),
-                            _buildTextField(
-                              controller: _ageController,
-                              label: 'Idade',
-                              suffix: 'anos',
-                              icon: Icons.cake,
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Por favor, insira sua idade';
-                                }
-                                final age = int.tryParse(value);
-                                if (age == null || age <= 0 || age > 120) {
-                                  return 'Idade inválida';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            _buildGenderSelector(),
+                            _buildDateSelector(),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-
-                      // Seção de Objetivo de Peso
-                      _buildSectionHeader(
-                        'Objetivo de Peso',
-                        Icons.flag,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildGoalSelector(),
-                      const SizedBox(height: 16),
-                      if (_selectedGoal != null && _selectedGoal != WeightGoal.maintain) ...[
-                        _buildInputCard(
-                          child: Column(
-                            children: [
-                              _buildTextField(
-                                controller: _targetWeightController,
-                                label: 'Peso Alvo',
-                                suffix: 'kg',
-                                icon: Icons.track_changes,
-                                keyboardType: TextInputType.number,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Por favor, insira seu peso alvo';
-                                  }
-                                  final weight = double.tryParse(value);
-                                  if (weight == null || weight <= 0 || weight > 500) {
-                                    return 'Peso inválido';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16),
-                              _buildDateSelector(),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        _buildSuggestedDateButton(),
-                      ],
-                      const SizedBox(height: 24),
-
-                      // Resultado do IMC
-                      if (profile != null) ...[
-                        _buildBMIResult(profile),
-                        const SizedBox(height: 16),
-                        _buildCalorieGoal(profile),
-                      ],
-                      const SizedBox(height: 24),
-                      _buildSaveButton(),
-                      if (profile != null) ...[
-                        const SizedBox(height: 16),
-                        _buildDeleteButton(),
-                      ],
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 8),
+                      _buildSuggestedDateButton(),
                     ],
-                  ),
+                    const SizedBox(height: 24),
+
+                    // Resultado do IMC
+                    if (profile != null) ...[
+                      _buildBMIResult(profile),
+                      const SizedBox(height: 16),
+                      _buildCalorieGoal(profile),
+                    ],
+                    const SizedBox(height: 24),
+                    _buildSaveButton(),
+                    if (profile != null) ...[
+                      const SizedBox(height: 16),
+                      _buildDeleteButton(),
+                    ],
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

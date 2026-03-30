@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 import '../models/meal.dart';
 import '../models/food_item.dart';
 import '../models/food_product.dart';
+import '../models/water_intake.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -23,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 9,
+      version: 10,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -36,6 +37,8 @@ class DatabaseHelper {
     await db.execute('CREATE TABLE food_products (id TEXT PRIMARY KEY, name TEXT NOT NULL, brand TEXT, serving_size REAL NOT NULL, servings_per_package REAL, icon INTEGER NOT NULL DEFAULT 0, border_color INTEGER NOT NULL DEFAULT 4278190335, energy_kcal REAL NOT NULL, energy_kj REAL, carbohydrates REAL NOT NULL, total_sugars REAL NOT NULL, added_sugars REAL NOT NULL, proteins REAL NOT NULL, fat_total REAL NOT NULL, fat_saturated REAL NOT NULL, fat_trans REAL NOT NULL, fiber REAL NOT NULL, sodium REAL NOT NULL)');
     await db.execute('CREATE TABLE user_profile (id TEXT PRIMARY KEY, height REAL NOT NULL, currentWeight REAL NOT NULL, age INTEGER NOT NULL, gender TEXT NOT NULL, targetWeight REAL, weightGoal INTEGER, targetDate TEXT, dailyCalorieGoal REAL NOT NULL)');
     await db.execute('CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+    await db.execute('CREATE TABLE water_intakes (id TEXT PRIMARY KEY, date TEXT NOT NULL, amount REAL NOT NULL, type TEXT NOT NULL, capacity REAL)');
+    await db.execute('CREATE TABLE water_bottles (id TEXT PRIMARY KEY, name TEXT NOT NULL, capacity REAL NOT NULL, color INTEGER NOT NULL)');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -79,6 +82,15 @@ class DatabaseHelper {
         await db.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
       } catch (e) {
         debugPrint('Erro ao criar tabela settings: $e');
+      }
+    }
+    if (oldVersion < 10) {
+      // Cria as tabelas de água
+      try {
+        await db.execute('CREATE TABLE IF NOT EXISTS water_intakes (id TEXT PRIMARY KEY, date TEXT NOT NULL, amount REAL NOT NULL, type TEXT NOT NULL, capacity REAL)');
+        await db.execute('CREATE TABLE IF NOT EXISTS water_bottles (id TEXT PRIMARY KEY, name TEXT NOT NULL, capacity REAL NOT NULL, color INTEGER NOT NULL)');
+      } catch (e) {
+        debugPrint('Erro ao criar tabelas de água: $e');
       }
     }
   }
@@ -215,6 +227,78 @@ class DatabaseHelper {
     final db = await instance.database;
     return await db.delete(
       'food_products',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Métodos para WaterIntake
+  Future<WaterIntake> createWaterIntake(WaterIntake intake) async {
+    final db = await instance.database;
+    await db.insert('water_intakes', intake.toMap());
+    return intake;
+  }
+
+  Future<List<WaterIntake>> getWaterIntakesByDate(DateTime date) async {
+    final db = await instance.database;
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    final maps = await db.query(
+      'water_intakes',
+      where: 'date >= ? AND date < ?',
+      whereArgs: [startOfDay.toIso8601String(), endOfDay.toIso8601String()],
+      orderBy: 'date DESC',
+    );
+    return maps.map((map) => WaterIntake.fromMap(map)).toList();
+  }
+
+  Future<List<WaterIntake>> getWaterIntakesByDateRange(DateTime start, DateTime end) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'water_intakes',
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [start.toIso8601String(), end.toIso8601String()],
+      orderBy: 'date DESC',
+    );
+    return maps.map((map) => WaterIntake.fromMap(map)).toList();
+  }
+
+  Future<int> deleteWaterIntake(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'water_intakes',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Métodos para WaterBottle
+  Future<WaterBottle> createWaterBottle(WaterBottle bottle) async {
+    final db = await instance.database;
+    await db.insert('water_bottles', bottle.toMap());
+    return bottle;
+  }
+
+  Future<List<WaterBottle>> getAllWaterBottles() async {
+    final db = await instance.database;
+    final maps = await db.query('water_bottles');
+    return maps.map((map) => WaterBottle.fromMap(map)).toList();
+  }
+
+  Future<int> updateWaterBottle(WaterBottle bottle) async {
+    final db = await instance.database;
+    return await db.update(
+      'water_bottles',
+      bottle.toMap(),
+      where: 'id = ?',
+      whereArgs: [bottle.id],
+    );
+  }
+
+  Future<int> deleteWaterBottle(String id) async {
+    final db = await instance.database;
+    return await db.delete(
+      'water_bottles',
       where: 'id = ?',
       whereArgs: [id],
     );

@@ -150,4 +150,25 @@ class MealProvider with ChangeNotifier {
     _selectedDate = date;
     loadMealsByDate(date);
   }
+
+  // Retorna o total de calorias por dia da semana
+  Map<int, double> getWeeklyCalories() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final weeklyData = <int, double>{};
+    
+    for (int i = 0; i < 7; i++) {
+      final day = startOfWeek.add(Duration(days: i));
+      final dayMeals = _meals.where((meal) {
+        return meal.date.year == day.year &&
+               meal.date.month == day.month &&
+               meal.date.day == day.day;
+      }).toList();
+      
+      final total = dayMeals.fold(0.0, (sum, meal) => sum + meal.totalCalories);
+      weeklyData[i] = total;
+    }
+    
+    return weeklyData;
+  }
 }

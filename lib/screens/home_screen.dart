@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/meal_provider.dart';
 import '../providers/user_profile_provider.dart';
+import '../providers/water_intake_provider.dart';
 import '../models/meal.dart';
 import 'meal_screen.dart';
 import 'dashboard_screen.dart';
 import 'food_products_list_screen.dart';
 import 'imc_screen.dart';
+import 'water_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('HomeScreen - Iniciando carregamento de dados...');
       final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
       final mealProvider = Provider.of<MealProvider>(context, listen: false);
+      final waterProvider = Provider.of<WaterIntakeProvider>(context, listen: false);
 
       debugPrint('HomeScreen - Carregando meta diária de calorias do banco...');
       await mealProvider.loadDailyCalorieGoal();
@@ -35,6 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
       await mealProvider.loadMealsByDate(DateTime.now());
       debugPrint('HomeScreen - Carregando base de alimentos...');
       await mealProvider.loadFoodBase();
+      // Carrega dados da semana para o dashboard
+      final now = DateTime.now();
+      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+      await mealProvider.loadMealsByDateRange(startOfWeek, endOfWeek);
       debugPrint('HomeScreen - Carregando perfil do usuário...');
       await userProfileProvider.loadUserProfile();
       debugPrint('HomeScreen - Perfil carregado: ${userProfileProvider.userProfile?.toMap()}');
@@ -47,6 +55,16 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         debugPrint('HomeScreen - Nenhum perfil encontrado, usando meta padrão');
       }
+
+      // Carrega dados do controle de água
+      debugPrint('HomeScreen - Carregando dados do controle de água...');
+      await waterProvider.loadWaterIntakesByDate(DateTime.now());
+      await waterProvider.loadBottles();
+      await waterProvider.loadDailyWaterGoal();
+      await waterProvider.loadNotificationSettings();
+      // Carrega dados da semana para o dashboard (reutilizando as variáveis já declaradas)
+      await waterProvider.loadWaterIntakesByDateRange(startOfWeek, endOfWeek);
+      debugPrint('HomeScreen - Dados do controle de água carregados');
     });
   }
 
@@ -80,12 +98,17 @@ class _HomeScreenState extends State<HomeScreen> {
         children: const [
           _DailyView(),
           DashboardScreen(),
+          WaterScreen(),
           IMCScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        backgroundColor: Colors.green,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.restaurant),
@@ -94,6 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: 'Dashboard',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.water_drop),
+            label: 'Água',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.monitor_weight),

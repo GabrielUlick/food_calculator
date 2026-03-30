@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/meal_provider.dart';
+import '../providers/user_profile_provider.dart';
+import '../providers/water_intake_provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,28 +15,26 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MealProvider>(context);
+    final mealProvider = Provider.of<MealProvider>(context);
+    final userProfileProvider = Provider.of<UserProfileProvider>(context);
+    final waterProvider = Provider.of<WaterIntakeProvider>(context);
 
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Dashboard',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 24),
-              _CalorieProgressCard(provider: provider),
+              _CalorieProgressCard(provider: mealProvider),
               const SizedBox(height: 16),
-              _MacronutrientsChart(provider: provider),
+              _MacronutrientsChart(provider: mealProvider),
               const SizedBox(height: 16),
-              _WeeklyProgressCard(provider: provider),
+              _WaterProgressCard(provider: waterProvider),
+              const SizedBox(height: 16),
+              _BMICard(provider: userProfileProvider),
+              const SizedBox(height: 16),
+              _WeeklyProgressCard(provider: mealProvider),
             ],
           ),
         ),
@@ -126,6 +126,184 @@ class _CalorieProgressCard extends StatelessWidget {
                   label: 'Restantes',
                   value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} kcal',
                   color: Colors.grey[600]!,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WaterProgressCard extends StatelessWidget {
+  final WaterIntakeProvider provider;
+
+  const _WaterProgressCard({required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = provider.waterProgress.clamp(0.0, 1.0);
+    final remaining = provider.dailyWaterGoal - provider.totalWaterIntake;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Progresso de Hidratação',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${(progress * 100).toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            LinearProgressIndicator(
+              value: progress,
+              minHeight: 10,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress >= 1.0 ? Colors.green : Colors.blue,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _StatItem(
+                  label: 'Consumido',
+                  value: '${provider.totalWaterIntake.toStringAsFixed(0)} ml',
+                  color: Colors.blue,
+                ),
+                _StatItem(
+                  label: 'Restante',
+                  value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} ml',
+                  color: Colors.grey[600]!,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BMICard extends StatelessWidget {
+  final UserProfileProvider provider;
+
+  const _BMICard({required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = provider.userProfile;
+    
+    if (profile == null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Índice de Massa Corporal (IMC)',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Center(
+                child: Text(
+                  'Configure seu perfil para ver o IMC',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final bmi = profile!.bmi;
+    final bmiClassification = profile!.bmiClassification;
+    final bmiColor = profile!.bmiColor;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Índice de Massa Corporal (IMC)',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bmi.toStringAsFixed(1),
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: bmiColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: bmiColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        bmiClassification,
+                        style: TextStyle(
+                          color: bmiColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    _StatItem(
+                      label: 'Peso Atual',
+                      value: '${profile!.currentWeight.toStringAsFixed(1)} kg',
+                      color: Colors.grey[700]!,
+                    ),
+                    const SizedBox(height: 8),
+                    _StatItem(
+                      label: 'Altura',
+                      value: '${profile!.height.toStringAsFixed(0)} cm',
+                      color: Colors.grey[700]!,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -372,15 +550,15 @@ class _WeeklyChart extends StatelessWidget {
   }
 
   List<FlSpot> _getWeeklySpots(MealProvider provider) {
-    // Simulação de dados da semana - em produção, buscar dados reais do banco
+    final weeklyCalories = provider.getWeeklyCalories();
     return [
-      const FlSpot(0, 1500),
-      const FlSpot(1, 1800),
-      const FlSpot(2, 2100),
-      const FlSpot(3, 1900),
-      const FlSpot(4, 1700),
-      const FlSpot(5, 2000),
-      FlSpot(6, provider.totalCalories),
+      FlSpot(0, weeklyCalories[0] ?? 0),
+      FlSpot(1, weeklyCalories[1] ?? 0),
+      FlSpot(2, weeklyCalories[2] ?? 0),
+      FlSpot(3, weeklyCalories[3] ?? 0),
+      FlSpot(4, weeklyCalories[4] ?? 0),
+      FlSpot(5, weeklyCalories[5] ?? 0),
+      FlSpot(6, weeklyCalories[6] ?? 0),
     ];
   }
 }

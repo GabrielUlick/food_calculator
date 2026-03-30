@@ -4,9 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:food_calculator/providers/meal_provider.dart';
 import 'package:food_calculator/providers/food_product_provider.dart';
 import 'package:food_calculator/providers/user_profile_provider.dart';
+import 'package:food_calculator/providers/water_intake_provider.dart';
 import 'package:food_calculator/screens/home_screen.dart';
+import 'package:food_calculator/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().initialize();
+  await NotificationService().requestPermissions();
   runApp(const MyApp());
 }
 
@@ -20,6 +25,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => MealProvider()),
         ChangeNotifierProvider(create: (context) => FoodProductProvider()),
         ChangeNotifierProvider(create: (context) => UserProfileProvider()),
+        ChangeNotifierProvider(create: (context) => WaterIntakeProvider()),
       ],
       child: MaterialApp(
         title: 'Calculadora de Calorias',
