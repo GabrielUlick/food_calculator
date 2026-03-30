@@ -151,7 +151,7 @@ class DatabaseHelper {
     final db = await instance.database;
     await db.delete('food_items', where: 'meal_id = ?', whereArgs: [meal.id]);
     for (var item in meal.items) {
-      await db.insert('food_items', {'id': item.id, 'meal_id': meal.id, 'name': item.name, 'calories': item.calories, 'proteins': item.proteins, 'lipids': item.lipids, 'carbohydrates': item.carbohydrates, 'fibers': item.fibers, 'quantity': item.quantity, 'border_color': item.borderColor.value});
+      await db.insert('food_items', {'id': item.id, 'meal_id': meal.id, 'name': item.name, 'calories': item.calories, 'proteins': item.proteins, 'lipids': item.lipids, 'carbohydrates': item.carbohydrates, 'fibers': item.fibers, 'quantity': item.quantity, 'border_color': item.borderColor.value, 'icon': item.icon?.index});
     }
     return await db.update('meals', {'type': meal.type.index, 'date': meal.date.toIso8601String()}, where: 'id = ?', whereArgs: [meal.id]);
   }

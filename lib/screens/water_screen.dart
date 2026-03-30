@@ -303,12 +303,10 @@ class _WaterScreenState extends State<WaterScreen> {
         builder: (context, setState) {
           return Consumer<WaterIntakeProvider>(
             builder: (context, provider, child) {
+              // Variável temporária para armazenar o intervalo selecionado
+              int tempInterval = provider.notificationInterval;
               // Inicializa o controlador apenas uma vez
               final goalController = TextEditingController(text: provider.dailyWaterGoal.toStringAsFixed(0));
-              // Inicializa tempInterval apenas na primeira vez
-              if (tempInterval == 0) {
-                tempInterval = provider.notificationInterval;
-              }
 
               return AlertDialog(
                 title: const Text('Configurações'),

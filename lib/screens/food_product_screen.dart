@@ -92,8 +92,13 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
   }
 
   double _parseDouble(String value) {
-    // Substitui vírgula por ponto para permitir ambos os formatos
-    return double.parse(value.replaceAll(',', '.'));
+    try {
+      // Substitui vírgula por ponto para permitir ambos os formatos
+      return double.parse(value.replaceAll(',', '.'));
+    } catch (e) {
+      debugPrint('Erro ao converter valor: $value');
+      return 0.0;
+    }
   }
 
   Future<void> _saveProduct() async {

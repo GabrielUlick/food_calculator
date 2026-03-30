@@ -60,14 +60,14 @@ class FoodItem {
     }
 
     return FoodItem(
-      id: map['id'],
-      name: map['name'],
-      calories: map['calories'],
-      proteins: map['proteins'],
-      lipids: map['lipids'],
-      carbohydrates: map['carbohydrates'],
-      fibers: map['fibers'],
-      quantity: map['quantity'],
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      calories: map['calories']?.toDouble() ?? 0.0,
+      proteins: map['proteins']?.toDouble() ?? 0.0,
+      lipids: map['lipids']?.toDouble() ?? 0.0,
+      carbohydrates: map['carbohydrates']?.toDouble() ?? 0.0,
+      fibers: map['fibers']?.toDouble() ?? 0.0,
+      quantity: map['quantity']?.toDouble() ?? 0.0,
       borderColor: color,
       icon: icon,
     );
