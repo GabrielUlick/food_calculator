@@ -5,6 +5,7 @@ import '../providers/meal_provider.dart';
 import '../models/meal.dart';
 import 'meal_screen.dart';
 import 'dashboard_screen.dart';
+import 'food_products_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,6 +33,18 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Calculadora de Calorias'),
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.restaurant_menu),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FoodProductsListScreen(),
+                ),
+              );
+            },
+            tooltip: 'Meus Alimentos',
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () => _showSettingsDialog(context),
@@ -285,17 +298,32 @@ class _NutrientCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          value.toStringAsFixed(1),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              value.toStringAsFixed(1),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 2),
+            Text(
+              unit,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 2),
         Text(
-          unit,
+          label,
           style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+            fontSize: 11,
+            color: color,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:food_calculator/providers/meal_provider.dart';
+import 'package:food_calculator/providers/food_product_provider.dart';
 import 'package:food_calculator/screens/home_screen.dart';
 
 void main() {
@@ -13,8 +14,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MealProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MealProvider()),
+        ChangeNotifierProvider(create: (context) => FoodProductProvider()),
+      ],
       child: MaterialApp(
         title: 'Calculadora de Calorias',
         debugShowCheckedModeBanner: false,

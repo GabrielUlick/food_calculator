@@ -1,4 +1,7 @@
 
+import 'package:flutter/material.dart';
+import 'food_product.dart';
+
 class FoodItem {
   final String id;
   final String name;
@@ -8,6 +11,8 @@ class FoodItem {
   final double carbohydrates; // em gramas
   final double fibers; // em gramas
   final double quantity; // quantidade em gramas
+  final Color borderColor; // cor da borda
+  final FoodIcon? icon; // ícone do alimento
 
   FoodItem({
     required this.id,
@@ -18,6 +23,8 @@ class FoodItem {
     required this.carbohydrates,
     required this.fibers,
     required this.quantity,
+    this.borderColor = Colors.blue,
+    this.icon,
   });
 
   // Calcula os valores baseados na quantidade informada
@@ -37,10 +44,21 @@ class FoodItem {
       'carbohydrates': carbohydrates,
       'fibers': fibers,
       'quantity': quantity,
+      'borderColor': borderColor.value,
+      'icon': icon?.index,
     };
   }
 
   factory FoodItem.fromMap(Map<String, dynamic> map) {
+    final colorValue = map['borderColor'] ?? Colors.blue.value;
+    final color = Color(colorValue);
+
+    // Recupera o ícone se existir
+    FoodIcon? icon;
+    if (map['icon'] != null) {
+      icon = FoodIcon.values[map['icon'] as int];
+    }
+
     return FoodItem(
       id: map['id'],
       name: map['name'],
@@ -50,6 +68,8 @@ class FoodItem {
       carbohydrates: map['carbohydrates'],
       fibers: map['fibers'],
       quantity: map['quantity'],
+      borderColor: color,
+      icon: icon,
     );
   }
 
@@ -62,6 +82,8 @@ class FoodItem {
     double? carbohydrates,
     double? fibers,
     double? quantity,
+    Color? borderColor,
+    FoodIcon? icon,
   }) {
     return FoodItem(
       id: id ?? this.id,
@@ -72,6 +94,8 @@ class FoodItem {
       carbohydrates: carbohydrates ?? this.carbohydrates,
       fibers: fibers ?? this.fibers,
       quantity: quantity ?? this.quantity,
+      borderColor: borderColor ?? this.borderColor,
+      icon: icon ?? this.icon,
     );
   }
 }

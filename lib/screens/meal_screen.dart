@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../providers/meal_provider.dart';
 import '../models/meal.dart';
 import '../models/food_item.dart';
+import 'add_food_to_meal_screen.dart';
 
 class MealScreen extends StatefulWidget {
   final MealType type;
@@ -38,8 +39,44 @@ class _MealScreenState extends State<MealScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddFoodDialog(context, provider),
+        onPressed: () => _showAddFoodOptions(context),
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showAddFoodOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('Selecionar da base'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddFoodToMealScreen(
+                      mealType: widget.type,
+                    ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Adicionar manualmente'),
+              onTap: () {
+                Navigator.pop(context);
+                _showAddFoodDialog(context, Provider.of<MealProvider>(context, listen: false));
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -230,10 +267,36 @@ class _MealItemCard extends StatelessWidget {
     final provider = Provider.of<MealProvider>(context);
     final item = meal.items.first;
 
+    // Define as cores disponíveis e encontra a cor correspondente pelo valor RGB
+    final availableColors = [Colors.blue, Colors.green, Colors.yellow, Colors.red];
+    final displayColor = availableColors.firstWhere(
+      (color) => color.value == item.borderColor.value,
+      orElse: () => Colors.blue,
+    );
+
     return Card(
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: displayColor,
+          width: 3,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: ListTile(
         leading: CircleAvatar(
-          child: Text(item.name[0].toUpperCase()),
+          backgroundColor: displayColor.withOpacity(0.2),
+          child: item.icon != null
+              ? Icon(
+                  item.icon!.iconData,
+                  color: displayColor,
+                )
+              : Text(
+                  item.name[0].toUpperCase(),
+                  style: TextStyle(
+                    color: displayColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
         title: Text(item.name),
         subtitle: Text(
