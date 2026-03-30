@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/food_product_provider.dart';
 import '../models/food_product.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 import 'food_product_screen.dart';
 
 class FoodProductsListScreen extends StatefulWidget {
@@ -43,32 +45,21 @@ class _FoodProductsListScreenState extends State<FoodProductsListScreen> {
         children: [
           // Barra de pesquisa
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
+            padding: const EdgeInsets.all(AppTheme.spacingM),
+            child: AppTextField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar alimentos...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          Provider.of<FoodProductProvider>(context, listen: false)
-                              .searchProducts('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Colors.grey[50],
-              ),
-              onChanged: (value) {
-                Provider.of<FoodProductProvider>(context, listen: false)
-                    .searchProducts(value);
-              },
+              label: 'Buscar alimentos...',
+              icon: Icons.search,
+              suffix: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        Provider.of<FoodProductProvider>(context, listen: false)
+                            .searchProducts('');
+                      },
+                    )
+                  : null,
             ),
           ),
           // Lista de produtos
@@ -82,39 +73,17 @@ class _FoodProductsListScreenState extends State<FoodProductsListScreen> {
                 final products = provider.searchResults;
 
                 if (products.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.restaurant_menu,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Nenhum alimento encontrado',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Adicione um novo alimento usando o botão +',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
+                  return const EmptyState(
+                    icon: Icons.restaurant_menu,
+                    title: 'Nenhum alimento encontrado',
+                    subtitle: 'Adicione um novo alimento usando o botão +',
                   );
                 }
 
                 return RefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
@@ -167,134 +136,100 @@ class _FoodProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (product.brand != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            product.brand!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${product.energyKcal.toStringAsFixed(0)} kcal',
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
                       style: const TextStyle(
-                        color: Colors.orange,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Porção: ${product.servingSize.toStringAsFixed(0)}g',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+                    if (product.brand != null) ...[
+                      const SizedBox(height: AppTheme.spacingXS),
+                      Text(
+                        product.brand!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 12,
-                runSpacing: 8,
-                children: [
-                  _NutrientChip(
-                    label: 'Carboidratos',
-                    value: product.carbohydrates,
-                    color: Colors.orange,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingM,
+                  vertical: AppTheme.spacingS,
+                ),
+                decoration: BoxDecoration(
+                  color: AppTheme.carbohydrateColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusS),
+                ),
+                child: Text(
+                  '${product.energyKcal.toStringAsFixed(0)} kcal',
+                  style: TextStyle(
+                    color: AppTheme.carbohydrateColor,
+                    fontWeight: FontWeight.bold,
                   ),
-                  _NutrientChip(
-                    label: 'Proteínas',
-                    value: product.proteins,
-                    color: Colors.blue,
-                  ),
-                  _NutrientChip(
-                    label: 'Gorduras',
-                    value: product.fatTotal,
-                    color: Colors.red,
-                  ),
-                  _NutrientChip(
-                    label: 'Fibras',
-                    value: product.fiber,
-                    color: Colors.green,
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: AppTheme.spacingM),
+          Text(
+            'Porção: ${product.servingSize.toStringAsFixed(0)}g',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingS),
+          Wrap(
+            spacing: AppTheme.spacingM,
+            runSpacing: AppTheme.spacingS,
+            children: [
+              NutrientChip(
+                label: 'Carboidratos',
+                value: product.carbohydrates,
+                unit: 'g',
+                color: AppTheme.carbohydrateColor,
+              ),
+              NutrientChip(
+                label: 'Proteínas',
+                value: product.proteins,
+                unit: 'g',
+                color: AppTheme.proteinColor,
+              ),
+              NutrientChip(
+                label: 'Gorduras',
+                value: product.fatTotal,
+                unit: 'g',
+                color: AppTheme.lipidColor,
+              ),
+              NutrientChip(
+                label: 'Fibras',
+                value: product.fiber,
+                unit: 'g',
+                color: AppTheme.fiberColor,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class _NutrientChip extends StatelessWidget {
-  final String label;
-  final double value;
-  final Color color;
-
-  const _NutrientChip({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        '$label: ${value.toStringAsFixed(1)}g',
-        style: TextStyle(
-          fontSize: 12,
-          color: color,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
+// _NutrientChip foi substituído por NutrientChip do app_widgets.dart

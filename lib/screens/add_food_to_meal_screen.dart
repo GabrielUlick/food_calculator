@@ -7,6 +7,8 @@ import '../providers/meal_provider.dart';
 import '../models/food_product.dart';
 import '../models/meal.dart';
 import '../models/food_item.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 
 class AddFoodToMealScreen extends StatefulWidget {
   final MealType mealType;
@@ -105,27 +107,21 @@ class _AddFoodToMealScreenState extends State<AddFoodToMealScreen> {
           // Barra de pesquisa
           Padding(
             padding: const EdgeInsets.all(16),
-            child: TextField(
+            child: AppTextField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar alimentos...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          Provider.of<FoodProductProvider>(context, listen: false)
-                              .searchProducts('');
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Colors.grey[50],
-              ),
+              label: 'Buscar alimentos',
+              hint: 'Digite o nome do alimento',
+              icon: Icons.search,
+              suffix: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        Provider.of<FoodProductProvider>(context, listen: false)
+                            .searchProducts('');
+                      },
+                    )
+                  : null,
               onChanged: (value) {
                 Provider.of<FoodProductProvider>(context, listen: false)
                     .searchProducts(value);
@@ -215,16 +211,12 @@ class _AddFoodToMealScreenState extends State<AddFoodToMealScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: TextField(
+                        child: AppTextField(
                           controller: _quantityController,
+                          label: 'Quantidade',
+                          suffixText: 'g',
+                          icon: Icons.scale,
                           keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            labelText: 'Quantidade (g)',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            suffixText: 'g',
-                          ),
                         ),
                       ),
                       const SizedBox(width: 12),

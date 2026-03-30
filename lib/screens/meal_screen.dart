@@ -4,6 +4,8 @@ import 'package:uuid/uuid.dart';
 import '../providers/meal_provider.dart';
 import '../models/meal.dart';
 import '../models/food_item.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 import 'add_food_to_meal_screen.dart';
 
 class MealScreen extends StatefulWidget {
@@ -227,32 +229,10 @@ class _MealScreenState extends State<MealScreen> {
 class _EmptyMealState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.restaurant_menu,
-            size: 64,
-            color: Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhum alimento adicionado',
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Toque no + para adicionar',
-            style: TextStyle(
-              color: Colors.grey[500],
-            ),
-          ),
-        ],
-      ),
+    return const EmptyState(
+      icon: Icons.restaurant_menu,
+      title: 'Nenhum alimento adicionado',
+      subtitle: 'Toque no + para adicionar',
     );
   }
 }
@@ -266,7 +246,6 @@ class _MealItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<MealProvider>(context);
     final item = meal.items.first;
-
     // Define as cores disponíveis e encontra a cor correspondente pelo valor RGB
     final availableColors = [Colors.blue, Colors.green, Colors.yellow, Colors.red];
     final displayColor = availableColors.firstWhere(
@@ -274,15 +253,10 @@ class _MealItemCard extends StatelessWidget {
       orElse: () => Colors.blue,
     );
 
-    return Card(
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: displayColor,
-          width: 3,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: ListTile(
+        contentPadding: const EdgeInsets.all(AppTheme.spacingM),
         leading: CircleAvatar(
           backgroundColor: displayColor.withOpacity(0.2),
           child: item.icon != null
@@ -311,6 +285,9 @@ class _MealItemCard extends StatelessWidget {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppTheme.radiusL),
+                    ),
                     title: const Text('Confirmar exclusão'),
                     content: const Text('Deseja realmente excluir este alimento?'),
                     actions: [
@@ -318,7 +295,7 @@ class _MealItemCard extends StatelessWidget {
                         onPressed: () => Navigator.pop(context),
                         child: const Text('Cancelar'),
                       ),
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           provider.deleteMeal(meal.id);
                           Navigator.pop(context);

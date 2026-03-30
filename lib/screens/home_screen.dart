@@ -5,6 +5,8 @@ import '../providers/meal_provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../providers/water_intake_provider.dart';
 import '../models/meal.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 import 'meal_screen.dart';
 import 'dashboard_screen.dart';
 import 'food_products_list_screen.dart';
@@ -93,22 +95,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          _DailyView(),
-          DashboardScreen(),
-          WaterScreen(),
-          IMCScreen(),
-        ],
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: IndexedStack(
+          key: ValueKey<int>(_currentIndex),
+          index: _currentIndex,
+          children: const [
+            _DailyView(),
+            DashboardScreen(),
+            WaterScreen(),
+            IMCScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white70,
-        backgroundColor: Colors.green,
-        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.restaurant),
@@ -138,17 +140,19 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+        ),
         title: const Text('Configurações'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            AppTextField(
               controller: goalController,
+              label: 'Meta diária de calorias',
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Meta diária de calorias',
-                suffixText: 'kcal',
-              ),
+              suffixText: 'kcal',
+              icon: Icons.local_fire_department,
             ),
           ],
         ),
@@ -157,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               final goal = double.tryParse(goalController.text);
               if (goal != null && goal > 0) {
@@ -251,156 +255,91 @@ class _DailySummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = Provider.of<MealProvider>(context);
     final progress = provider.calorieProgress.clamp(0.0, 1.0);
+    final progressColor = progress >= 1.0 ? AppTheme.errorColor : AppTheme.primaryColor;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Resumo do Dia',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return AppCard(
+      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Resumo do Dia',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                Text(
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingM,
+                  vertical: AppTheme.spacingS,
+                ),
+                decoration: BoxDecoration(
+                  color: progressColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                ),
+                child: Text(
                   '${provider.totalCalories.toStringAsFixed(0)} / ${provider.dailyCalorieGoal.toStringAsFixed(0)} kcal',
                   style: TextStyle(
-                    fontSize: 16,
-                    color: progress >= 1.0 ? Colors.red : Colors.green,
+                    fontSize: 14,
+                    color: progressColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                progress >= 1.0 ? Colors.red : Colors.green,
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NutrientCard(
-                  label: 'Proteínas',
-                  value: provider.totalProteins,
-                  unit: 'g',
-                  color: Colors.blue,
-                ),
-                _NutrientCard(
-                  label: 'Carboidratos',
-                  value: provider.totalCarbohydrates,
-                  unit: 'g',
-                  color: Colors.orange,
-                ),
-                _NutrientCard(
-                  label: 'Lipídios',
-                  value: provider.totalLipids,
-                  unit: 'g',
-                  color: Colors.red,
-                ),
-                _NutrientCard(
-                  label: 'Fibras',
-                  value: provider.totalFibers,
-                  unit: 'g',
-                  color: Colors.green,
-                ),
-              ],
-            ),
-          ],
-        ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          AppProgressBar(
+            value: progress,
+            color: progressColor,
+            height: 10,
+            showPercentage: false,
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              NutrientCard(
+                label: 'Proteínas',
+                value: provider.totalProteins,
+                unit: 'g',
+                color: AppTheme.proteinColor,
+                icon: Icons.fitness_center,
+              ),
+              NutrientCard(
+                label: 'Carboidratos',
+                value: provider.totalCarbohydrates,
+                unit: 'g',
+                color: AppTheme.carbohydrateColor,
+                icon: Icons.grain,
+              ),
+              NutrientCard(
+                label: 'Lipídios',
+                value: provider.totalLipids,
+                unit: 'g',
+                color: AppTheme.lipidColor,
+                icon: Icons.water_drop,
+              ),
+              NutrientCard(
+                label: 'Fibras',
+                value: provider.totalFibers,
+                unit: 'g',
+                color: AppTheme.fiberColor,
+                icon: Icons.eco,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class _NutrientCard extends StatelessWidget {
-  final String label;
-  final double value;
-  final String unit;
-  final Color color;
-
-  const _NutrientCard({
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            _getIconForLabel(label),
-            color: color,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              value.toStringAsFixed(1),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 2),
-            Text(
-              unit,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: color,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  IconData _getIconForLabel(String label) {
-    switch (label) {
-      case 'Proteínas':
-        return Icons.fitness_center;
-      case 'Carboidratos':
-        return Icons.grain;
-      case 'Lipídios':
-        return Icons.water_drop;
-      case 'Fibras':
-        return Icons.eco;
-      default:
-        return Icons.circle;
-    }
-  }
-}
+// Removido - agora usando NutrientCard do app_widgets.dart
 
 class _MealCard extends StatelessWidget {
   final MealType type;
@@ -413,64 +352,89 @@ class _MealCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MealScreen(type: type),
-          ),
+    final color = _getColorForMealType(type);
+    final totalCalories = meals.fold(0.0, (sum, meal) => sum + meal.totalCalories);
+    final isComplete = meals.isNotEmpty;
+
+    return AppCard(
+      margin: const EdgeInsets.only(bottom: AppTheme.spacingM),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MealScreen(type: type),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _getColorForMealType(type).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getIconForMealType(type),
-                  color: _getColorForMealType(type),
-                  size: 28,
-                ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spacingM),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(AppTheme.radiusM),
+              border: Border.all(
+                color: color.withOpacity(0.3),
+                width: 2,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            child: Icon(
+              _getIconForMealType(type),
+              color: color,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacingM),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  type.displayName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
                   children: [
-                    Text(
-                      type.displayName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Icon(
+                      isComplete ? Icons.check_circle : Icons.circle_outlined,
+                      size: 16,
+                      color: isComplete ? AppTheme.successColor : Colors.grey,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(width: 4),
                     Text(
                       '${meals.length} ${meals.length == 1 ? 'item' : 'itens'}',
                       style: TextStyle(
                         color: Colors.grey[600],
+                        fontSize: 12,
                       ),
                     ),
                   ],
                 ),
-              ),
-              Text(
-                '${meals.fold(0.0, (sum, meal) => sum + meal.totalCalories).toStringAsFixed(0)} kcal',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.chevron_right),
-            ],
+              ],
+            ),
           ),
-        ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingM,
+              vertical: AppTheme.spacingS,
+            ),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(AppTheme.radiusS),
+            ),
+            child: Text(
+              '${totalCalories.toStringAsFixed(0)} kcal',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacingS),
+          const Icon(Icons.chevron_right, color: Colors.grey),
+        ],
       ),
     );
   }
@@ -478,13 +442,13 @@ class _MealCard extends StatelessWidget {
   Color _getColorForMealType(MealType type) {
     switch (type) {
       case MealType.breakfast:
-        return Colors.orange;
+        return AppTheme.warningColor;
       case MealType.lunch:
-        return Colors.green;
+        return AppTheme.primaryColor;
       case MealType.dinner:
         return Colors.purple;
       case MealType.snack:
-        return Colors.blue;
+        return AppTheme.infoColor;
     }
   }
 

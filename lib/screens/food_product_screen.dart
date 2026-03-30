@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../providers/food_product_provider.dart';
 import '../models/food_product.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 
 class FoodProductScreen extends StatefulWidget {
   final FoodProduct? product;
@@ -175,28 +177,26 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppTheme.spacingM),
           children: [
             _buildSection('Informações Básicas', [
-              _buildTextField(
+              AppTextField(
                 controller: _nameController,
                 label: 'Nome do alimento',
                 icon: Icons.restaurant,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _brandController,
                 label: 'Marca (opcional)',
                 icon: Icons.business,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _servingSizeController,
                 label: 'Porção (g)',
                 icon: Icons.scale,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _servingsPerPackageController,
                 label: 'Porções por embalagem (opcional)',
                 icon: Icons.inventory_2,
@@ -205,18 +205,17 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
             ]),
             _buildSection('Aparência', [
               _buildIconSelector(),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppTheme.spacingM),
               _buildColorSelector(),
             ]),
             _buildSection('Informações Energéticas', [
-              _buildTextField(
+              AppTextField(
                 controller: _energyKcalController,
                 label: 'Valor energético (kcal)',
                 icon: Icons.local_fire_department,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _energyKjController,
                 label: 'Valor energético (kJ) - opcional',
                 icon: Icons.local_fire_department,
@@ -224,87 +223,70 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
               ),
             ]),
             _buildSection('Carboidratos', [
-              _buildTextField(
+              AppTextField(
                 controller: _carbohydratesController,
                 label: 'Carboidratos (g)',
                 icon: Icons.grain,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _totalSugarsController,
                 label: 'Açúcares totais (g)',
                 icon: Icons.water_drop,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _addedSugarsController,
                 label: 'Açúcares adicionados (g)',
                 icon: Icons.add_circle,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
             ]),
             _buildSection('Proteínas e Gorduras', [
-              _buildTextField(
+              AppTextField(
                 controller: _proteinsController,
                 label: 'Proteínas (g)',
                 icon: Icons.fitness_center,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _fatTotalController,
                 label: 'Gorduras totais (g)',
                 icon: Icons.opacity,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _fatSaturatedController,
                 label: 'Gorduras saturadas (g)',
                 icon: Icons.warning,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _fatTransController,
                 label: 'Gorduras trans (g)',
                 icon: Icons.block,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
             ]),
             _buildSection('Outros', [
-              _buildTextField(
+              AppTextField(
                 controller: _fiberController,
                 label: 'Fibras alimentares (g)',
                 icon: Icons.eco,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
-              _buildTextField(
+              AppTextField(
                 controller: _sodiumController,
                 label: 'Sódio (mg)',
                 icon: Icons.science,
                 keyboardType: TextInputType.number,
-                required: true,
               ),
             ]),
-            const SizedBox(height: 24),
-            ElevatedButton(
+            const SizedBox(height: AppTheme.spacingL),
+            PrimaryButton(
+              text: widget.product == null ? 'Cadastrar Alimento' : 'Salvar Alterações',
               onPressed: _saveProduct,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: Text(
-                widget.product == null ? 'Cadastrar Alimento' : 'Salvar Alterações',
-                style: const TextStyle(fontSize: 16),
-              ),
+              fullWidth: true,
             ),
           ],
         ),
@@ -317,18 +299,18 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingM),
           child: Text(
             title,
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
+              color: AppTheme.primaryColor,
             ),
           ),
         ),
         ...children,
-        const Divider(height: 32),
+        const Divider(height: AppTheme.spacingXL),
       ],
     );
   }
@@ -436,45 +418,15 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
-    bool required = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType ?? TextInputType.text,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          border: const OutlineInputBorder(),
-          filled: true,
-          fillColor: Colors.grey[50],
-        ),
-        validator: (value) {
-          if (required && (value == null || value.trim().isEmpty)) {
-            return 'Este campo é obrigatório';
-          }
-          if (value != null && value.trim().isNotEmpty && keyboardType == TextInputType.number) {
-            final number = double.tryParse(value.replaceAll(',', '.'));
-            if (number == null || number < 0) {
-              return 'Digite um valor válido';
-            }
-          }
-          return null;
-        },
-      ),
-    );
-  }
+// _buildTextField foi substituído por AppTextField do app_widgets.dart
 
   void _confirmDelete() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusL),
+        ),
         title: const Text('Confirmar exclusão'),
         content: const Text('Deseja realmente excluir este alimento?'),
         actions: [
@@ -482,7 +434,7 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               final provider = Provider.of<FoodProductProvider>(context, listen: false);
               await provider.deleteProduct(widget.product!.id);
@@ -492,7 +444,7 @@ class _FoodProductScreenState extends State<FoodProductScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Alimento excluído com sucesso!'),
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppTheme.successColor,
                   ),
                 );
               }

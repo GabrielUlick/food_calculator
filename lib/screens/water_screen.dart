@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/water_intake_provider.dart';
 import '../models/water_intake.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 
 class WaterScreen extends StatefulWidget {
   const WaterScreen({super.key});
@@ -32,16 +34,16 @@ class _WaterScreenState extends State<WaterScreen> {
           child: Consumer<WaterIntakeProvider>(
             builder: (context, provider, child) {
               return SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                padding: const EdgeInsets.all(AppTheme.spacingM),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildProgressCard(provider),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppTheme.spacingL),
                     _buildQuickActions(provider),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppTheme.spacingL),
                     _buildBottlesSection(provider),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppTheme.spacingL),
                     _buildIntakesList(provider),
                   ],
                 ),
@@ -56,63 +58,68 @@ class _WaterScreenState extends State<WaterScreen> {
   Widget _buildProgressCard(WaterIntakeProvider provider) {
     final progress = provider.waterProgress.clamp(0.0, 1.0);
     final remaining = provider.dailyWaterGoal - provider.totalWaterIntake;
+    final progressColor = progress >= 1.0 ? AppTheme.successColor : AppTheme.infoColor;
 
-    return Card(
-      child: InkWell(
-        onTap: () => _showSettingsDialog(context),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Progresso Diário',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+    return AppCard(
+      onTap: () => _showSettingsDialog(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Progresso Diário',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 10,
-              backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                progress >= 1.0 ? Colors.green : Colors.blue,
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _StatItem(
-                  label: 'Consumido',
-                  value: '${provider.totalWaterIntake.toStringAsFixed(0)} ml',
-                  color: Colors.blue,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingM,
+                  vertical: AppTheme.spacingS,
                 ),
-                _StatItem(
-                  label: 'Restante',
-                  value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} ml',
-                  color: Colors.grey[600]!,
+                decoration: BoxDecoration(
+                  color: progressColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
                 ),
-              ],
-            ),
-          ],
-        ),
-        ),
+                child: Text(
+                  '${(progress * 100).toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: progressColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          AppProgressBar(
+            value: progress,
+            color: progressColor,
+            height: 10,
+          ),
+          const SizedBox(height: AppTheme.spacingM),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              StatCard(
+                label: 'Consumido',
+                value: '${provider.totalWaterIntake.toStringAsFixed(0)} ml',
+                color: progressColor,
+                icon: Icons.water_drop,
+              ),
+              StatCard(
+                label: 'Restante',
+                value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} ml',
+                color: Colors.grey[600]!,
+                icon: Icons.timer,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -128,7 +135,7 @@ class _WaterScreenState extends State<WaterScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppTheme.spacingM),
         Row(
           children: [
             Expanded(
@@ -138,7 +145,7 @@ class _WaterScreenState extends State<WaterScreen> {
                 onTap: () => _addWaterIntake(provider, 200, 'copo'),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppTheme.spacingM),
             Expanded(
               child: _QuickActionButton(
                 icon: Icons.local_cafe,
@@ -146,7 +153,7 @@ class _WaterScreenState extends State<WaterScreen> {
                 onTap: () => _addWaterIntake(provider, 300, 'copo'),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppTheme.spacingM),
             Expanded(
               child: _QuickActionButton(
                 icon: Icons.water_drop,
@@ -181,16 +188,12 @@ class _WaterScreenState extends State<WaterScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppTheme.spacingM),
         if (provider.bottles.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Text(
-                'Nenhuma garrafa cadastrada',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
+          const EmptyState(
+            icon: Icons.water_drop_outlined,
+            title: 'Nenhuma garrafa cadastrada',
+            subtitle: 'Adicione uma garrafa para começar a rastrear sua hidratação',
           )
         else
           GridView.builder(
@@ -199,8 +202,8 @@ class _WaterScreenState extends State<WaterScreen> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               childAspectRatio: 1.5,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+              crossAxisSpacing: AppTheme.spacingM,
+              mainAxisSpacing: AppTheme.spacingM,
             ),
             itemCount: provider.bottles.length,
             itemBuilder: (context, index) {
@@ -229,16 +232,12 @@ class _WaterScreenState extends State<WaterScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppTheme.spacingM),
         if (intakes.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24.0),
-              child: Text(
-                'Nenhum registro hoje',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
+          const EmptyState(
+            icon: Icons.history,
+            title: 'Nenhum registro hoje',
+            subtitle: 'Beba água e comece a rastrear sua hidratação',
           )
         else
           ListView.builder(
@@ -309,19 +308,21 @@ class _WaterScreenState extends State<WaterScreen> {
               final goalController = TextEditingController(text: provider.dailyWaterGoal.toStringAsFixed(0));
 
               return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusL),
+                ),
                 title: const Text('Configurações'),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(
+                    AppTextField(
                       controller: goalController,
+                      label: 'Meta diária de água',
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Meta diária de água',
-                        suffixText: 'ml',
-                      ),
+                      suffixText: 'ml',
+                      icon: Icons.local_fire_department,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
                     SwitchListTile(
                       title: const Text('Notificações'),
                       subtitle: const Text('Lembrete para beber água'),
@@ -331,7 +332,7 @@ class _WaterScreenState extends State<WaterScreen> {
                       },
                     ),
                     if (provider.notificationsEnabled) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppTheme.spacingS),
                       const Text('Intervalo de notificações:'),
                       Slider(
                         value: tempInterval.toDouble(),
@@ -358,7 +359,7 @@ class _WaterScreenState extends State<WaterScreen> {
                     onPressed: () => Navigator.pop(context),
                     child: const Text('Cancelar'),
                   ),
-                  TextButton(
+                  ElevatedButton(
                     onPressed: () {
                       final goal = double.tryParse(goalController.text);
                       if (goal != null && goal > 0) {

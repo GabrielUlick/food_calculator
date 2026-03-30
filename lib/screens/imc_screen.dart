@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import '../providers/user_profile_provider.dart';
 import '../models/user_profile.dart';
 import '../providers/meal_provider.dart';
+import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
+import '../widgets/selectors.dart';
 
 class IMCScreen extends StatefulWidget {
   const IMCScreen({super.key});
@@ -220,7 +223,7 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              padding: const EdgeInsets.all(AppTheme.spacingM),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -231,7 +234,7 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
                       'Dados Pessoais',
                       Icons.person,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppTheme.spacingM),
                     _buildInputCard(
                       child: Column(
                         children: [
@@ -360,14 +363,14 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 8),
+        Icon(icon, color: AppTheme.primaryColor),
+        const SizedBox(width: AppTheme.spacingS),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
+            color: AppTheme.primaryColor,
           ),
         ),
       ],
@@ -375,15 +378,9 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
   }
 
   Widget _buildInputCard({required Widget child}) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: child,
-      ),
+    return AppCard(
+      elevated: true,
+      child: child,
     );
   }
 
@@ -395,88 +392,50 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
     required TextInputType keyboardType,
     required String? Function(String?) validator,
   }) {
-    return TextFormField(
+    return AppTextField(
       controller: controller,
+      label: label,
+      suffixText: suffix,
+      icon: icon,
       keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        suffixText: suffix,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
-      ),
       validator: validator,
     );
   }
 
   Widget _buildGenderSelector() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.grey[50],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: RadioListTile<String>(
-              title: const Text('Masculino'),
-              value: 'Masculino',
-              groupValue: _gender,
-              onChanged: (value) {
-                setState(() {
-                  _gender = value!;
-                });
-              },
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-          ),
-          Expanded(
-            child: RadioListTile<String>(
-              title: const Text('Feminino'),
-              value: 'Feminino',
-              groupValue: _gender,
-              onChanged: (value) {
-                setState(() {
-                  _gender = value!;
-                });
-              },
-              contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-          ),
-        ],
-      ),
+    return GenderSelector(
+      selectedGender: _gender,
+      onChanged: (value) {
+        setState(() {
+          _gender = value;
+        });
+      },
     );
   }
 
   Widget _buildGoalSelector() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return AppCard(
+      elevated: true,
       child: Column(
         children: [
           _buildGoalOption(
             title: 'Perder Peso',
             icon: Icons.trending_down,
-            color: Colors.orange,
+            color: AppTheme.warningColor,
             value: WeightGoal.lose,
           ),
           const Divider(height: 1),
           _buildGoalOption(
             title: 'Manter Peso',
             icon: Icons.trending_flat,
-            color: Colors.green,
+            color: AppTheme.successColor,
             value: WeightGoal.maintain,
           ),
           const Divider(height: 1),
           _buildGoalOption(
             title: 'Ganhar Peso',
             icon: Icons.trending_up,
-            color: Colors.blue,
+            color: AppTheme.infoColor,
             value: WeightGoal.gain,
           ),
         ],
@@ -530,29 +489,10 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
   }
 
   Widget _buildDateSelector() {
-    return InkWell(
+    return DateSelector(
+      selectedDate: _targetDate,
       onTap: () => _selectDate(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.grey[50],
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.calendar_today),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                _targetDate != null
-                    ? DateFormat('dd/MM/yyyy').format(_targetDate!)
-                    : 'Selecione uma data',
-              ),
-            ),
-          ],
-        ),
-      ),
+      label: 'Selecione uma data',
     );
   }
 
