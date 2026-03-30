@@ -19,14 +19,16 @@ class GenderSelector extends StatelessWidget {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF2C2C2C) : Colors.grey[50],
-        borderRadius: BorderRadius.circular(AppTheme.radiusS),
-        border: Border.all(
-          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey[300]!,
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDarkMode ? const Color(0xFF2C2C2C) : Colors.grey[50],
+          borderRadius: BorderRadius.circular(AppTheme.radiusS),
+          border: Border.all(
+            color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey[300]!,
+          ),
         ),
-      ),
       child: Column(
         children: [
           RadioListTile<String>(
@@ -73,6 +75,7 @@ class GenderSelector extends StatelessWidget {
           ),
         ],
       ),
+      ),
     );
   }
 }
@@ -94,9 +97,11 @@ class DateSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return InkWell(
-      onTap: onTap,
-      child: Container(
+    return SizedBox(
+      width: double.infinity,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spacingM,
           vertical: AppTheme.spacingM,
@@ -130,6 +135,7 @@ class DateSelector extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

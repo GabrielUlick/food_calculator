@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -9,117 +10,196 @@ class NotificationService {
   NotificationService._internal();
 
   final FlutterLocalNotificationsPlugin _notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
   bool _initialized = false;
+
+  // Lista de mensagens amigáveis para as notificações de água
+  static const List<String> _waterReminderTitles = [
+    '💧 Hora de se hidratar!',
+    '🚰 Beba um copo de água!',
+    '💦 Sua saúde agradece!',
+    '🌊 Água é vida!',
+    '🥤 Hora de beber água!',
+  ];
+
+  static const List<String> _waterReminderBodies = [
+    'Não esqueça de beber água! Seu corpo precisa se manter hidratado.',
+    'Um copo de água agora faz toda a diferença para sua saúde!',
+    'A hidratação é essencial para o bom funcionamento do seu corpo.',
+    'Mantenha-se hidratado! Beba água regularmente ao longo do dia.',
+    'Chegou a hora de beber água! Cuide da sua saúde.',
+    'A água ajuda a manter sua energia e concentração. Beba agora!',
+    'Pequenas pausas para beber água fazem muita diferença!',
+  ];
 
   bool get isInitialized => _initialized;
 
   Future<void> initialize() async {
-    if (_initialized) return;
+    if (_initialized) {
+      debugPrint('NotificationService já inicializado');
+      return;
+    }
 
-    // Inicializa o timezone
-    tz_data.initializeTimeZones();
+    try {
+      // Inicializa o timezone
+      tz_data.initializeTimeZones();
 
-    // Configurações para Android
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+      // Configurações para Android com canal de notificação
+      const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // Configurações para iOS
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+      // Configurações para iOS
+      const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    // Configurações de inicialização
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
+      // Configurações de inicialização
+      const InitializationSettings initializationSettings =
+      InitializationSettings(
+        android: initializationSettingsAndroid,
+        iOS: initializationSettingsIOS,
+      );
 
-    // Inicializa o plugin
-    await _notificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onNotificationTap,
-    );
+      // Inicializa o plugin
+      await _notificationsPlugin.initialize(
+        initializationSettings,
+        onDidReceiveNotificationResponse: _onNotificationTap,
+      );
 
-    _initialized = true;
-    debugPrint('NotificationService inicializado');
+      _initialized = true;
+      debugPrint('✅ NotificationService inicializado com sucesso');
+    } catch (e) {
+      debugPrint('❌ Erro ao inicializar NotificationService: $e');
+      rethrow;
+    }
   }
 
   void _onNotificationTap(NotificationResponse response) {
-    debugPrint('Notificação tocada: ${response.payload}');
+    debugPrint('🔔 Notificação tocada: ${response.payload}');
   }
 
-  Future<void> requestPermissions() async {
-    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+  Future<bool> requestPermissions() async {
+    bool granted = false;
 
-    if (androidImplementation != null) {
-      final bool? granted = await androidImplementation.requestNotificationsPermission();
-      debugPrint('Permissão de notificação Android: $granted');
+    try {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+      _notificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidImplementation != null) {
+        final bool? androidGranted = await androidImplementation.requestNotificationsPermission();
+        granted = androidGranted ?? false;
+        debugPrint('📱 Permissão de notificação Android: $granted');
+      }
+
+      final IOSFlutterLocalNotificationsPlugin? iosImplementation =
+      _notificationsPlugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+
+      if (iosImplementation != null) {
+        final bool? iosGranted = await iosImplementation.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+        granted = granted || (iosGranted ?? false);
+        debugPrint('🍎 Permissão de notificação iOS: $iosGranted');
+      }
+    } catch (e) {
+      debugPrint('❌ Erro ao solicitar permissões: $e');
     }
 
-    final IOSFlutterLocalNotificationsPlugin? iosImplementation =
-        _notificationsPlugin.resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
-
-    if (iosImplementation != null) {
-      final bool? granted = await iosImplementation.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-      debugPrint('Permissão de notificação iOS: $granted');
-    }
+    return granted;
   }
 
   Future<void> scheduleWaterReminder({
     required int intervalMinutes,
-    required String title,
-    required String body,
+    String? customTitle,
+    String? customBody,
   }) async {
-    // Primeiro, cancela notificações anteriores para evitar duplicatas
-    await cancelWaterReminders();
-    
-    // Agenda múltiplas notificações para o dia
-    final now = tz.TZDateTime.now(tz.local);
-    final notificationsPerDay = (24 * 60) ~/ intervalMinutes;
-    
-    for (int i = 0; i < notificationsPerDay; i++) {
-      final scheduledTime = now.add(Duration(minutes: intervalMinutes * (i + 1)));
-      
-      await _notificationsPlugin.zonedSchedule(
-        i, // ID único para cada notificação
-        title,
-        body,
-        scheduledTime,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'water_reminders',
-            'Lembretes de Água',
-            channelDescription: 'Notificações para lembrar de beber água',
-            importance: Importance.high,
-            priority: Priority.high,
-            ongoing: false,
-            autoCancel: true,
-          ),
-          iOS: DarwinNotificationDetails(
-            presentAlert: true,
-            presentBadge: true,
-            presentSound: true,
-          ),
-        ),
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-      );
-    }
+    try {
+      // Verifica se o serviço está inicializado
+      if (!_initialized) {
+        await initialize();
+      }
 
-    debugPrint('$notificationsPerDay notificações agendadas para cada $intervalMinutes minutos');
+      // Verifica permissões
+      final hasPermissions = await requestPermissions();
+      if (!hasPermissions) {
+        debugPrint('⚠️ Permissões de notificação não concedidas');
+        return;
+      }
+
+      // Primeiro, cancela notificações anteriores para evitar duplicatas
+      await cancelWaterReminders();
+
+      // Agenda múltiplas notificações para o dia
+      final now = tz.TZDateTime.now(tz.local);
+      final notificationsPerDay = min((24 * 60) ~/ intervalMinutes, 50); // Limita a 50 notificações
+
+      for (int i = 0; i < notificationsPerDay; i++) {
+        final scheduledTime = now.add(Duration(minutes: intervalMinutes * (i + 1)));
+
+        // Seleciona mensagens aleatórias para cada notificação
+        final title = customTitle ?? _getRandomTitle();
+        final body = customBody ?? _getRandomBody();
+
+        await _notificationsPlugin.zonedSchedule(
+          i, // ID único para cada notificação
+          title,
+          body,
+          scheduledTime,
+          const NotificationDetails(
+            android: AndroidNotificationDetails(
+              'water_reminders',
+              'Lembretes de Água',
+              channelDescription: 'Notificações para lembrar de beber água',
+              importance: Importance.high,
+              priority: Priority.high,
+              ongoing: false,
+              autoCancel: true,
+              showWhen: true,
+              icon: '@mipmap/ic_launcher',
+              largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+              styleInformation: BigTextStyleInformation(
+                '',
+                htmlFormatBigText: true,
+                contentTitle: '',
+                htmlFormatContentTitle: true,
+              ),
+            ),
+            iOS: DarwinNotificationDetails(
+              presentAlert: true,
+              presentBadge: true,
+              presentSound: true,
+              sound: 'default',
+            ),
+          ),
+          uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      }
+
+      debugPrint('✅ $notificationsPerDay notificações agendadas para cada $intervalMinutes minutos');
+    } catch (e) {
+      debugPrint('❌ Erro ao agendar notificações de água: $e');
+      rethrow;
+    }
+  }
+
+  String _getRandomTitle() {
+    final random = Random();
+    return _waterReminderTitles[random.nextInt(_waterReminderTitles.length)];
+  }
+
+  String _getRandomBody() {
+    final random = Random();
+    return _waterReminderBodies[random.nextInt(_waterReminderBodies.length)];
   }
 
   tz.TZDateTime _getNextNotificationTime(int intervalMinutes) {
@@ -142,45 +222,64 @@ class NotificationService {
   }
 
   Future<void> cancelAllNotifications() async {
-    await _notificationsPlugin.cancelAll();
-    debugPrint('Todas as notificações canceladas');
+    try {
+      await _notificationsPlugin.cancelAll();
+      debugPrint('✅ Todas as notificações canceladas');
+    } catch (e) {
+      debugPrint('❌ Erro ao cancelar notificações: $e');
+    }
   }
 
   Future<void> cancelWaterReminders() async {
-    // Cancela todas as notificações de água (calcula o número máximo possível)
-    final maxNotifications = (24 * 60) ~/ 15; // Assumindo intervalo mínimo de 15 minutos
-    for (int i = 0; i < maxNotifications; i++) {
-      await _notificationsPlugin.cancel(i);
+    try {
+      // Cancela todas as notificações de água (calcula o número máximo possível)
+      final maxNotifications = (24 * 60) ~/ 15; // Assumindo intervalo mínimo de 15 minutos
+      for (int i = 0; i < maxNotifications; i++) {
+        await _notificationsPlugin.cancel(i);
+      }
+      debugPrint('✅ Lembretes de água cancelados');
+    } catch (e) {
+      debugPrint('❌ Erro ao cancelar lembretes de água: $e');
     }
-    debugPrint('Lembretes de água cancelados');
   }
 
   Future<void> showImmediateNotification({
     required String title,
     required String body,
   }) async {
-    const NotificationDetails notificationDetails = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'water_reminders',
-        'Lembretes de Água',
-        channelDescription: 'Notificações para lembrar de beber água',
-        importance: Importance.high,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
+    try {
+      if (!_initialized) {
+        await initialize();
+      }
 
-    await _notificationsPlugin.show(
-      0,
-      title,
-      body,
-      notificationDetails,
-    );
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: AndroidNotificationDetails(
+          'water_reminders',
+          'Lembretes de Água',
+          channelDescription: 'Notificações para lembrar de beber água',
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: true,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: 'default',
+        ),
+      );
 
-    debugPrint('Notificação imediata exibida: $title');
+      await _notificationsPlugin.show(
+        0,
+        title,
+        body,
+        notificationDetails,
+      );
+
+      debugPrint('✅ Notificação imediata exibida: $title');
+    } catch (e) {
+      debugPrint('❌ Erro ao exibir notificação imediata: $e');
+    }
   }
 }

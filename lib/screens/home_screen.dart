@@ -136,29 +136,118 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showSettingsDialog(BuildContext context) {
     final provider = Provider.of<MealProvider>(context, listen: false);
     final TextEditingController goalController = TextEditingController(text: provider.dailyCalorieGoal.toStringAsFixed(0));
-
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusL),
         ),
-        title: const Text('Configurações'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+        title: Row(
           children: [
-            AppTextField(
-              controller: goalController,
-              label: 'Meta diária de calorias',
-              keyboardType: TextInputType.number,
-              suffixText: 'kcal',
-              icon: Icons.local_fire_department,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppTheme.radiusM),
+              ),
+              child: Icon(
+                Icons.settings,
+                color: AppTheme.primaryColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingM),
+            const Text(
+              'Configurações',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacingM),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF2C2C2C).withOpacity(0.5)
+                      : AppTheme.primaryColor.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF2C2C2C)
+                        : AppTheme.primaryColor.withOpacity(0.1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: isDark ? Colors.white70 : AppTheme.textSecondaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppTheme.spacingS),
+                    Expanded(
+                      child: Text(
+                        'Defina sua meta diária de calorias para acompanhar sua alimentação.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isDark ? Colors.white70 : AppTheme.textSecondaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingL),
+              AppTextField(
+                controller: goalController,
+                label: 'Meta diária de calorias',
+                keyboardType: TextInputType.number,
+                suffixText: 'kcal',
+                icon: Icons.local_fire_department,
+              ),
+              const SizedBox(height: AppTheme.spacingM),
+              Text(
+                'Sugestões de metas:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingS),
+              Wrap(
+                spacing: AppTheme.spacingS,
+                runSpacing: AppTheme.spacingS,
+                children: [
+                  _buildSuggestionChip(context, '1500', goalController),
+                  _buildSuggestionChip(context, '1800', goalController),
+                  _buildSuggestionChip(context, '2000', goalController),
+                  _buildSuggestionChip(context, '2500', goalController),
+                  _buildSuggestionChip(context, '3000', goalController),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingL,
+                vertical: AppTheme.spacingM,
+              ),
+            ),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
@@ -167,11 +256,60 @@ class _HomeScreenState extends State<HomeScreen> {
               if (goal != null && goal > 0) {
                 provider.setDailyCalorieGoal(goal);
                 Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Row(
+                      children: const [
+                        Icon(Icons.check_circle, color: Colors.white),
+                        SizedBox(width: AppTheme.spacingS),
+                        Text('Meta diária atualizada com sucesso!'),
+                      ],
+                    ),
+                    backgroundColor: AppTheme.successColor,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Por favor, insira um valor válido.'),
+                    backgroundColor: AppTheme.errorColor,
+                  ),
+                );
               }
             },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingL,
+                vertical: AppTheme.spacingM,
+              ),
+            ),
             child: const Text('Salvar'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSuggestionChip(BuildContext context, String value, TextEditingController controller) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return ActionChip(
+      label: Text('$value kcal'),
+      onPressed: () {
+        controller.text = value;
+      },
+      backgroundColor: isDark 
+          ? const Color(0xFF2C2C2C).withOpacity(0.5)
+          : AppTheme.primaryColor.withOpacity(0.1),
+      labelStyle: TextStyle(
+        color: isDark ? Colors.white : AppTheme.primaryColor,
+        fontWeight: FontWeight.w500,
+      ),
+      side: BorderSide(
+        color: isDark 
+            ? const Color(0xFF2C2C2C)
+            : AppTheme.primaryColor.withOpacity(0.3),
       ),
     );
   }

@@ -31,8 +31,8 @@ class WaterIntakeProvider with ChangeNotifier {
   List<WaterIntake> getIntakesByDate(DateTime date) {
     return _waterIntakes.where((intake) {
       return intake.date.year == date.year &&
-             intake.date.month == date.month &&
-             intake.date.day == date.day;
+          intake.date.month == date.month &&
+          intake.date.day == date.day;
     }).toList();
   }
 
@@ -61,19 +61,19 @@ class WaterIntakeProvider with ChangeNotifier {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
     final weeklyData = <int, double>{};
-    
+
     for (int i = 0; i < 7; i++) {
       final day = startOfWeek.add(Duration(days: i));
       final dayIntakes = _waterIntakes.where((intake) {
         return intake.date.year == day.year &&
-               intake.date.month == day.month &&
-               intake.date.day == day.day;
+            intake.date.month == day.month &&
+            intake.date.day == day.day;
       }).toList();
-      
+
       final total = dayIntakes.fold(0.0, (sum, intake) => sum + intake.amount);
       weeklyData[i] = total;
     }
-    
+
     return weeklyData;
   }
 
@@ -128,7 +128,7 @@ class WaterIntakeProvider with ChangeNotifier {
       debugPrint('Meta diária de água já é $goal ml');
       return;
     }
-    
+
     _dailyWaterGoal = goal;
     _saveDailyWaterGoal(goal);
     notifyListeners();
@@ -182,15 +182,15 @@ class WaterIntakeProvider with ChangeNotifier {
   }
 
   // Define se as notificações estão habilitadas
-  void setNotificationsEnabled(bool enabled) async {
+  Future<void> setNotificationsEnabled(bool enabled) async {
     // Só atualiza se o valor for diferente
     if (_notificationsEnabled == enabled) {
       debugPrint('Notificações já estão ${enabled ? 'habilitadas' : 'desabilitadas'}');
       return;
     }
-    
+
     _notificationsEnabled = enabled;
-    _saveNotificationSettings();
+    await _saveNotificationSettings();
 
     if (enabled) {
       // Agenda as notificações
@@ -198,39 +198,35 @@ class WaterIntakeProvider with ChangeNotifier {
       await NotificationService().requestPermissions();
       await NotificationService().scheduleWaterReminder(
         intervalMinutes: _notificationInterval,
-        title: '💧 Hora de beber água!',
-        body: 'Não esqueça de se hidratar! Beba um copo de água agora.',
       );
-      debugPrint('Notificações de água agendadas');
+      debugPrint('✅ Notificações de água agendadas');
     } else {
       // Cancela as notificações
       await NotificationService().cancelWaterReminders();
-      debugPrint('Notificações de água canceladas');
+      debugPrint('✅ Notificações de água canceladas');
     }
 
     notifyListeners();
   }
 
   // Define o intervalo de notificações
-  void setNotificationInterval(int minutes) async {
+  Future<void> setNotificationInterval(int minutes) async {
     // Só atualiza se o valor for diferente
     if (_notificationInterval == minutes) {
       debugPrint('Intervalo de notificação já é $minutes minutos');
       return;
     }
-    
+
     _notificationInterval = minutes;
-    _saveNotificationSettings();
+    await _saveNotificationSettings();
 
     // Se as notificações estiverem habilitadas, reagenda com o novo intervalo
     if (_notificationsEnabled) {
       await NotificationService().cancelWaterReminders();
       await NotificationService().scheduleWaterReminder(
         intervalMinutes: _notificationInterval,
-        title: '💧 Hora de beber água!',
-        body: 'Não esqueça de se hidratar! Beba um copo de água agora.',
       );
-      debugPrint('Notificações reagendadas com intervalo de $minutes minutos');
+      debugPrint('✅ Notificações reagendadas com intervalo de $minutes minutos');
     }
 
     notifyListeners();
@@ -289,10 +285,8 @@ class WaterIntakeProvider with ChangeNotifier {
         await NotificationService().initialize();
         await NotificationService().scheduleWaterReminder(
           intervalMinutes: _notificationInterval,
-          title: '💧 Hora de beber água!',
-          body: 'Não esqueça de se hidratar! Beba um copo de água agora.',
         );
-        debugPrint('Notificações de água restauradas');
+        debugPrint('✅ Notificações de água restauradas');
       }
 
       notifyListeners();

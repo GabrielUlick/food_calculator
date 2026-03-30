@@ -378,9 +378,13 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
   }
 
   Widget _buildInputCard({required Widget child}) {
-    return AppCard(
-      elevated: true,
-      child: child,
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        elevated: true,
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        child: child,
+      ),
     );
   }
 
@@ -414,31 +418,35 @@ class _IMCScreenState extends State<IMCScreen> with SingleTickerProviderStateMix
   }
 
   Widget _buildGoalSelector() {
-    return AppCard(
-      elevated: true,
-      child: Column(
-        children: [
-          _buildGoalOption(
-            title: 'Perder Peso',
-            icon: Icons.trending_down,
-            color: AppTheme.warningColor,
-            value: WeightGoal.lose,
-          ),
-          const Divider(height: 1),
-          _buildGoalOption(
-            title: 'Manter Peso',
-            icon: Icons.trending_flat,
-            color: AppTheme.successColor,
-            value: WeightGoal.maintain,
-          ),
-          const Divider(height: 1),
-          _buildGoalOption(
-            title: 'Ganhar Peso',
-            icon: Icons.trending_up,
-            color: AppTheme.infoColor,
-            value: WeightGoal.gain,
-          ),
-        ],
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        elevated: true,
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          children: [
+            _buildGoalOption(
+              title: 'Perder Peso',
+              icon: Icons.trending_down,
+              color: AppTheme.warningColor,
+              value: WeightGoal.lose,
+            ),
+            const Divider(height: 1),
+            _buildGoalOption(
+              title: 'Manter Peso',
+              icon: Icons.trending_flat,
+              color: AppTheme.successColor,
+              value: WeightGoal.maintain,
+            ),
+            const Divider(height: 1),
+            _buildGoalOption(
+              title: 'Ganhar Peso',
+              icon: Icons.trending_up,
+              color: AppTheme.infoColor,
+              value: WeightGoal.gain,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -55,84 +55,106 @@ class _CalorieProgressCard extends StatelessWidget {
     final progress = provider.calorieProgress.clamp(0.0, 1.0);
     final remaining = provider.dailyCalorieGoal - provider.totalCalories;
     final progressColor = progress >= 1.0 ? AppTheme.errorColor : AppTheme.primaryColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Progresso Diário',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          SizedBox(
-            height: 200,
-            child: Stack(
-              alignment: Alignment.center,
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        margin: const EdgeInsets.symmetric(horizontal: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                PieChart(
-                  PieChartData(
-                    sectionsSpace: 0,
-                    centerSpaceRadius: 60,
-                    sections: [
-                      PieChartSectionData(
-                        value: provider.totalCalories,
-                        color: progressColor,
-                        radius: 50,
-                        showTitle: false,
-                      ),
-                      PieChartSectionData(
-                        value: remaining > 0 ? remaining : 0,
-                        color: Colors.grey[300],
-                        radius: 50,
-                        showTitle: false,
-                      ),
-                    ],
-                  ),
+                Icon(
+                  Icons.local_fire_department,
+                  color: progressColor,
+                  size: 24,
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${(progress * 100).toStringAsFixed(0)}%',
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'da meta',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: AppTheme.spacingS),
+                Text(
+                  'Progresso Diário',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              StatCard(
-                label: 'Consumidas',
-                value: '${provider.totalCalories.toStringAsFixed(0)} kcal',
-                color: progressColor,
-                icon: Icons.local_fire_department,
+            const SizedBox(height: AppTheme.spacingM),
+            SizedBox(
+              height: 200,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  PieChart(
+                    PieChartData(
+                      sectionsSpace: 0,
+                      centerSpaceRadius: 60,
+                      sections: [
+                        PieChartSectionData(
+                          value: provider.totalCalories,
+                          color: progressColor,
+                          radius: 50,
+                          showTitle: false,
+                        ),
+                        PieChartSectionData(
+                          value: remaining > 0 ? remaining : 0,
+                          color: isDark ? Colors.grey[700] : Colors.grey[300],
+                          radius: 50,
+                          showTitle: false,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${(progress * 100).toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                        ),
+                      ),
+                      Text(
+                        'da meta',
+                        style: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              StatCard(
-                label: 'Restantes',
-                value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} kcal',
-                color: Colors.grey[600]!,
-                icon: Icons.timer,
-              ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: StatCard(
+                    label: 'Consumidas',
+                    value: '${provider.totalCalories.toStringAsFixed(0)} kcal',
+                    color: progressColor,
+                    icon: Icons.local_fire_department,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: StatCard(
+                    label: 'Restantes',
+                    value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} kcal',
+                    color: isDark ? Colors.grey[400]! : Colors.grey[600]!,
+                    icon: Icons.timer,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -148,66 +170,94 @@ class _WaterProgressCard extends StatelessWidget {
     final progress = provider.waterProgress.clamp(0.0, 1.0);
     final remaining = provider.dailyWaterGoal - provider.totalWaterIntake;
     final progressColor = progress >= 1.0 ? AppTheme.successColor : AppTheme.infoColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Progresso de Hidratação',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        margin: const EdgeInsets.symmetric(horizontal: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.water_drop,
+                      color: progressColor,
+                      size: 24,
+                    ),
+                    const SizedBox(width: AppTheme.spacingS),
+                    Text(
+                      'Progresso de Hidratação',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacingM,
-                  vertical: AppTheme.spacingS,
-                ),
-                decoration: BoxDecoration(
-                  color: progressColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusM),
-                ),
-                child: Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: progressColor,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spacingM,
+                    vertical: AppTheme.spacingS,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isDark 
+                        ? const Color(0xFF2C2C2C).withOpacity(0.5)
+                        : progressColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusM),
+                    border: Border.all(
+                      color: isDark 
+                          ? const Color(0xFF2C2C2C)
+                          : progressColor.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: progressColor,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          AppProgressBar(
-            value: progress,
-            color: progressColor,
-            height: 10,
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              StatCard(
-                label: 'Consumido',
-                value: '${provider.totalWaterIntake.toStringAsFixed(0)} ml',
-                color: progressColor,
-                icon: Icons.water_drop,
-              ),
-              StatCard(
-                label: 'Restante',
-                value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} ml',
-                color: Colors.grey[600]!,
-                icon: Icons.timer,
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            AppProgressBar(
+              value: progress,
+              color: progressColor,
+              height: 10,
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: StatCard(
+                    label: 'Consumido',
+                    value: '${provider.totalWaterIntake.toStringAsFixed(0)} ml',
+                    color: progressColor,
+                    icon: Icons.water_drop,
+                  ),
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: StatCard(
+                    label: 'Restante',
+                    value: '${remaining > 0 ? remaining.toStringAsFixed(0) : 0} ml',
+                    color: isDark ? Colors.grey[400]! : Colors.grey[600]!,
+                    icon: Icons.timer,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -221,25 +271,41 @@ class _BMICard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final profile = provider.userProfile;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     if (profile == null) {
-      return AppCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Índice de Massa Corporal (IMC)',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      return SizedBox(
+        width: double.infinity,
+        child: AppCard(
+          margin: const EdgeInsets.symmetric(horizontal: 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.person_outline,
+                    color: AppTheme.primaryColor,
+                    size: 24,
+                  ),
+                  const SizedBox(width: AppTheme.spacingS),
+                  Text(
+                    'Índice de Massa Corporal (IMC)',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: AppTheme.spacingM),
-            const EmptyState(
-              icon: Icons.person_outline,
-              title: 'Configure seu perfil para ver o IMC',
-            ),
-          ],
+              const SizedBox(height: AppTheme.spacingM),
+              const EmptyState(
+                icon: Icons.person_outline,
+                title: 'Configure seu perfil para ver o IMC',
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -248,70 +314,93 @@ class _BMICard extends StatelessWidget {
     final bmiClassification = profile!.bmiClassification;
     final bmiColor = profile!.bmiColor;
 
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Índice de Massa Corporal (IMC)',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        margin: const EdgeInsets.symmetric(horizontal: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.monitor_weight,
+                  color: bmiColor,
+                  size: 24,
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Text(
+                  'Índice de Massa Corporal (IMC)',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bmi.toStringAsFixed(1),
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: bmiColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: bmiColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      bmiClassification,
-                      style: TextStyle(
-                        color: bmiColor,
-                        fontWeight: FontWeight.bold,
+            const SizedBox(height: AppTheme.spacingM),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        bmi.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: bmiColor,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: bmiColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: bmiColor.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          bmiClassification,
+                          style: TextStyle(
+                            color: bmiColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  StatCard(
-                    label: 'Peso Atual',
-                    value: '${profile!.currentWeight.toStringAsFixed(1)} kg',
-                    color: Colors.grey[700]!,
-                    icon: Icons.monitor_weight,
+                ),
+                const SizedBox(width: AppTheme.spacingM),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      StatCard(
+                        label: 'Peso Atual',
+                        value: '${profile!.currentWeight.toStringAsFixed(1)} kg',
+                        color: isDark ? Colors.grey[400]! : Colors.grey[700]!,
+                        icon: Icons.monitor_weight,
+                      ),
+                      const SizedBox(height: AppTheme.spacingS),
+                      StatCard(
+                        label: 'Altura',
+                        value: '${profile!.height.toStringAsFixed(0)} cm',
+                        color: isDark ? Colors.grey[400]! : Colors.grey[700]!,
+                        icon: Icons.height,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: AppTheme.spacingS),
-                  StatCard(
-                    label: 'Altura',
-                    value: '${profile!.height.toStringAsFixed(0)} cm',
-                    color: Colors.grey[700]!,
-                    icon: Icons.height,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -326,75 +415,92 @@ class _MacronutrientsChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Macronutrientes',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          SizedBox(
-            height: 200,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: _getMaxValue(provider),
-                barGroups: [
-                  _buildBarGroup(0, provider.totalProteins, AppTheme.proteinColor),
-                  _buildBarGroup(1, provider.totalCarbohydrates, AppTheme.carbohydrateColor),
-                  _buildBarGroup(2, provider.totalLipids, AppTheme.lipidColor),
-                  _buildBarGroup(3, provider.totalFibers, AppTheme.fiberColor),
-                ],
-                titlesData: FlTitlesData(
-                  show: true,
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        switch (value.toInt()) {
-                          case 0:
-                            return const Text('Proteínas');
-                          case 1:
-                            return const Text('Carbos');
-                          case 2:
-                            return const Text('Lipídios');
-                          case 3:
-                            return const Text('Fibras');
-                          default:
-                            return const Text('');
-                        }
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) {
-                        return Text(
-                          value.toStringAsFixed(0),
-                          style: const TextStyle(fontSize: 10),
-                        );
-                      },
-                    ),
-                  ),
-                  topTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  rightTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        margin: const EdgeInsets.symmetric(horizontal: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.restaurant,
+                  color: AppTheme.primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Text(
+                  'Macronutrientes',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppTheme.textPrimaryColor,
                   ),
                 ),
-                borderData: FlBorderData(show: false),
-                gridData: FlGridData(show: true),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spacingM),
+            SizedBox(
+              height: 200,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: _getMaxValue(provider),
+                  barGroups: [
+                    _buildBarGroup(0, provider.totalProteins, AppTheme.proteinColor),
+                    _buildBarGroup(1, provider.totalCarbohydrates, AppTheme.carbohydrateColor),
+                    _buildBarGroup(2, provider.totalLipids, AppTheme.lipidColor),
+                    _buildBarGroup(3, provider.totalFibers, AppTheme.fiberColor),
+                  ],
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          switch (value.toInt()) {
+                            case 0:
+                              return const Text('Proteínas');
+                            case 1:
+                              return const Text('Carbos');
+                            case 2:
+                              return const Text('Lipídios');
+                            case 3:
+                              return const Text('Fibras');
+                            default:
+                              return const Text('');
+                          }
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            value.toStringAsFixed(0),
+                            style: const TextStyle(fontSize: 10),
+                          );
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  gridData: FlGridData(show: true),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -432,20 +538,37 @@ class _WeeklyProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Progresso da Semana',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return SizedBox(
+      width: double.infinity,
+      child: AppCard(
+        margin: const EdgeInsets.symmetric(horizontal: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  color: AppTheme.primaryColor,
+                  size: 24,
+                ),
+                const SizedBox(width: AppTheme.spacingS),
+                Text(
+                  'Progresso da Semana',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppTheme.textPrimaryColor,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: AppTheme.spacingM),
-          _WeeklyChart(provider: provider),
-        ],
+            const SizedBox(height: AppTheme.spacingM),
+            _WeeklyChart(provider: provider),
+          ],
+        ),
       ),
     );
   }
