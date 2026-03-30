@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/meal.dart';
@@ -22,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 5,
+      version: 9,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -33,6 +34,8 @@ class DatabaseHelper {
     await db.execute('CREATE TABLE food_items (id TEXT PRIMARY KEY, meal_id TEXT NOT NULL, name TEXT NOT NULL, calories REAL NOT NULL, proteins REAL NOT NULL, lipids REAL NOT NULL, carbohydrates REAL NOT NULL, fibers REAL NOT NULL, quantity REAL NOT NULL, border_color INTEGER NOT NULL DEFAULT 4278190335, icon INTEGER, FOREIGN KEY (meal_id) REFERENCES meals (id) ON DELETE CASCADE)');
     await db.execute('CREATE TABLE food_base (id TEXT PRIMARY KEY, name TEXT NOT NULL, calories REAL NOT NULL, proteins REAL NOT NULL, lipids REAL NOT NULL, carbohydrates REAL NOT NULL, fibers REAL NOT NULL)');
     await db.execute('CREATE TABLE food_products (id TEXT PRIMARY KEY, name TEXT NOT NULL, brand TEXT, serving_size REAL NOT NULL, servings_per_package REAL, icon INTEGER NOT NULL DEFAULT 0, border_color INTEGER NOT NULL DEFAULT 4278190335, energy_kcal REAL NOT NULL, energy_kj REAL, carbohydrates REAL NOT NULL, total_sugars REAL NOT NULL, added_sugars REAL NOT NULL, proteins REAL NOT NULL, fat_total REAL NOT NULL, fat_saturated REAL NOT NULL, fat_trans REAL NOT NULL, fiber REAL NOT NULL, sodium REAL NOT NULL)');
+    await db.execute('CREATE TABLE user_profile (id TEXT PRIMARY KEY, height REAL NOT NULL, currentWeight REAL NOT NULL, age INTEGER NOT NULL, gender TEXT NOT NULL, targetWeight REAL, weightGoal INTEGER, targetDate TEXT, dailyCalorieGoal REAL NOT NULL)');
+    await db.execute('CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -51,6 +54,32 @@ class DatabaseHelper {
     if (oldVersion < 5) {
       // Adiciona o campo icon à tabela food_items
       await db.execute('ALTER TABLE food_items ADD COLUMN icon INTEGER');
+    }
+    if (oldVersion < 6) {
+      // Cria a tabela user_profile
+      await db.execute('CREATE TABLE user_profile (id TEXT PRIMARY KEY, height REAL NOT NULL, currentWeight REAL NOT NULL, age INTEGER NOT NULL, gender TEXT NOT NULL, targetWeight REAL, weightGoal INTEGER, targetDate TEXT, dailyCalorieGoal REAL NOT NULL)');
+    }
+    if (oldVersion < 7) {
+      // Cria a tabela user_profile se não existir
+      await db.execute('CREATE TABLE IF NOT EXISTS user_profile (id TEXT PRIMARY KEY, height REAL NOT NULL, currentWeight REAL NOT NULL, age INTEGER NOT NULL, gender TEXT NOT NULL, targetWeight REAL, weightGoal INTEGER, targetDate TEXT, dailyCalorieGoal REAL NOT NULL)');
+    }
+    if (oldVersion < 8) {
+      // Adiciona os campos age e gender à tabela existente
+      try {
+        await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER NOT NULL DEFAULT 30');
+        await db.execute('ALTER TABLE user_profile ADD COLUMN gender TEXT NOT NULL DEFAULT "Masculino"');
+      } catch (e) {
+        // Se as colunas já existirem, ignora o erro
+        debugPrint('Erro ao adicionar colunas: $e');
+      }
+    }
+    if (oldVersion < 9) {
+      // Cria a tabela settings para armazenar configurações globais
+      try {
+        await db.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+      } catch (e) {
+        debugPrint('Erro ao criar tabela settings: $e');
+      }
     }
   }
 

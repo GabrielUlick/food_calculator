@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/meal_provider.dart';
+import '../providers/user_profile_provider.dart';
 import '../models/meal.dart';
 import 'meal_screen.dart';
 import 'dashboard_screen.dart';
 import 'food_products_list_screen.dart';
+import 'imc_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,9 +22,31 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<MealProvider>(context, listen: false).loadMealsByDate(DateTime.now());
-      Provider.of<MealProvider>(context, listen: false).loadFoodBase();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      debugPrint('HomeScreen - Iniciando carregamento de dados...');
+      final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+      final mealProvider = Provider.of<MealProvider>(context, listen: false);
+
+      debugPrint('HomeScreen - Carregando meta diária de calorias do banco...');
+      await mealProvider.loadDailyCalorieGoal();
+      debugPrint('HomeScreen - Meta diária de calorias carregada: ${mealProvider.dailyCalorieGoal}');
+
+      debugPrint('HomeScreen - Carregando refeições...');
+      await mealProvider.loadMealsByDate(DateTime.now());
+      debugPrint('HomeScreen - Carregando base de alimentos...');
+      await mealProvider.loadFoodBase();
+      debugPrint('HomeScreen - Carregando perfil do usuário...');
+      await userProfileProvider.loadUserProfile();
+      debugPrint('HomeScreen - Perfil carregado: ${userProfileProvider.userProfile?.toMap()}');
+
+      // Carrega a meta diária de calorias do perfil do usuário
+      if (userProfileProvider.userProfile != null) {
+        final calorieGoal = userProfileProvider.userProfile!.dailyCalorieGoal;
+        debugPrint('HomeScreen - Definindo meta diária de calorias do perfil: $calorieGoal');
+        mealProvider.setDailyCalorieGoal(calorieGoal);
+      } else {
+        debugPrint('HomeScreen - Nenhum perfil encontrado, usando meta padrão');
+      }
     });
   }
 
@@ -56,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: const [
           _DailyView(),
           DashboardScreen(),
+          IMCScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -70,6 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.bar_chart),
             label: 'Dashboard',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.monitor_weight),
+            label: 'IMC',
+          ),
         ],
       ),
     );
@@ -77,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showSettingsDialog(BuildContext context) {
     final provider = Provider.of<MealProvider>(context, listen: false);
-    final TextEditingController goalController = TextEditingController(text: provider.dailyCalorieGoal.toString());
+    final TextEditingController goalController = TextEditingController(text: provider.dailyCalorieGoal.toStringAsFixed(0));
 
     showDialog(
       context: context,

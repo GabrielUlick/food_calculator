@@ -90,8 +90,59 @@ class MealProvider with ChangeNotifier {
 
   // Define a meta diária de calorias
   void setDailyCalorieGoal(double goal) {
+    debugPrint('Definindo meta diária de calorias: $goal');
     _dailyCalorieGoal = goal;
+    _saveDailyCalorieGoal(goal);
     notifyListeners();
+  }
+
+  // Salva a meta diária de calorias no banco de dados
+  Future<void> _saveDailyCalorieGoal(double goal) async {
+    try {
+      final db = await DatabaseHelper.instance.database;
+      // Verifica se já existe uma meta salva
+      final existing = await db.query('settings', where: 'key = ?', whereArgs: ['daily_calorie_goal']);
+
+      if (existing.isNotEmpty) {
+        // Atualiza a meta existente
+        await db.update(
+          'settings',
+          {'key': 'daily_calorie_goal', 'value': goal.toString()},
+          where: 'key = ?',
+          whereArgs: ['daily_calorie_goal'],
+        );
+      } else {
+        // Insere nova meta
+        await db.insert(
+          'settings',
+          {'key': 'daily_calorie_goal', 'value': goal.toString()},
+        );
+      }
+      debugPrint('Meta diária de calorias salva no banco: $goal');
+    } catch (e) {
+      debugPrint('Erro ao salvar meta diária de calorias: $e');
+    }
+  }
+
+  // Carrega a meta diária de calorias do banco de dados
+  Future<void> loadDailyCalorieGoal() async {
+    try {
+      final db = await DatabaseHelper.instance.database;
+      final result = await db.query(
+        'settings',
+        where: 'key = ?',
+        whereArgs: ['daily_calorie_goal'],
+      );
+
+      if (result.isNotEmpty) {
+        final goal = double.parse(result.first['value'] as String);
+        _dailyCalorieGoal = goal;
+        debugPrint('Meta diária de calorias carregada do banco: $goal');
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar meta diária de calorias: $e');
+    }
   }
 
   // Muda a data selecionada

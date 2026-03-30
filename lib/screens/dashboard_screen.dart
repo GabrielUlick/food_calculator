@@ -93,6 +93,7 @@ class _CalorieProgressCard extends StatelessWidget {
                     ),
                   ),
                   Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         '${(progress * 100).toStringAsFixed(0)}%',
