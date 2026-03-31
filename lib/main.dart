@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:food_calculator/providers/meal_provider.dart';
-import 'package:food_calculator/providers/food_product_provider.dart';
-import 'package:food_calculator/providers/user_profile_provider.dart';
-import 'package:food_calculator/providers/water_intake_provider.dart';
-import 'package:food_calculator/screens/home_screen.dart';
-import 'package:food_calculator/services/notification_service.dart';
-import 'package:food_calculator/theme/app_theme.dart';
+import 'package:izafit/providers/meal_provider.dart';
+import 'package:izafit/providers/food_product_provider.dart';
+import 'package:izafit/providers/user_profile_provider.dart';
+import 'package:izafit/providers/water_intake_provider.dart';
+import 'package:izafit/screens/home_screen.dart';
+import 'package:izafit/services/notification_service.dart';
+import 'package:izafit/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => WaterIntakeProvider()),
       ],
       child: MaterialApp(
-        title: 'Calculadora de Calorias',
+        title: 'Izafit',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="200dp"
+        android:height="200dp"
+        android:viewportWidth="200"
+        android:viewportHeight="200">
+
+    <!-- Fundo circular -->
+    <path
+            android:fillColor="#4CAF50"
+            android:pathData="M100,10 A90,90 0 1,1 100,190 A90,90 0 1,1 100,10 Z"/>
+
+    <!-- Coração ajustado com largura maior -->
+    <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M100,165 C55,120 30,75 55,50 C75,30 100,55 100,80 C100,55 125,30 145,50 C170,75 145,120 100,165 Z"/>
+</vector>

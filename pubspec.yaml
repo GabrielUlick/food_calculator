@@ -1,5 +1,5 @@
 
-name: food_calculator
+name: izafit
 description: Aplicativo para cálculo de calorias e nutrientes de refeições
 publish_to: 'none'
 version: 1.0.0+1
@@ -44,3 +44,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  assets:
+    - assets/images/

@@ -1,0 +1,17 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo circular -->
+  <circle cx="100" cy="100" r="90" fill="#4CAF50"/>
+
+  <!-- Coração -->
+  <path d="M100 160 C 60 120, 40 80, 60 60 C 80 40, 100 60, 100 80 C 100 60, 120 40, 140 60 C 160 80, 140 120, 100 160 Z" 
+        fill="white" 
+        stroke="none"/>
+
+  <!-- Texto Izafit -->
+  <text x="100" y="180" 
+        font-family="Arial, sans-serif" 
+        font-size="16" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="white">Izafit</text>
+</svg>

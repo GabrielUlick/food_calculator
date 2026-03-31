@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="280dp"
+    android:viewportWidth="200"
+    android:viewportHeight="280">
+
+    <!-- Fundo circular -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M100,10 A90,90 0 1,1 100,190 A90,90 0 1,1 100,10 Z"/>
+
+    <!-- Coração ajustado com largura maior -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,165 C55,120 30,75 55,50 C75,30 100,55 100,80 C100,55 125,30 145,50 C170,75 145,120 100,165 Z"/>
+
+    <!-- Texto IZAFIT usando paths -->
+    <group
+        android:translateX="50"
+        android:translateY="250">
+        <!-- Letra I -->
+        <path
+            android:fillColor="#4CAF50"
+            android:pathData="M0,0 L10,0 L10,30 L0,30 Z"/>
+        <!-- Letra Z -->
+        <path
+            android:fillColor="#4CAF50"
+            android:pathData="M15,0 L35,0 L15,30 L35,30 L35,25 L20,25 L35,5 L20,5 L20,0 Z"/>
+        <!-- Letra A -->
+        <path
+            android:fillColor="#4CAF50"
+            android:pathData="M45,0 L55,30 L65,0 L60,0 L55,15 L50,0 Z M50,18 L60,18 L55,25 Z"/>
+        <!-- Letra F -->
+        <path
+            android:fillColor="#4CAF50"
+            android:pathData="M75,0 L90,0 L90,5 L80,5 L80,12 L88,12 L88,17 L80,17 L80,30 L75,30 Z"/>
+        <!-- Letra I -->
+        <path
+            android:fillColor="#4CAF50"
+            android:pathData="M95,0 L105,0 L105,30 L95,30 Z"/>
+        <!-- Letra T -->
+        <path
+            android:fillColor="#4CAF50"
+            android:pathData="M110,0 L130,0 L130,5 L122,5 L122,30 L117,30 L117,5 L110,5 Z"/>
+    </group>
+</vector>

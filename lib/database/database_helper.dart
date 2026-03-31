@@ -14,7 +14,7 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('food_calculator.db');
+    _database = await _initDB('izafit.db');
     return _database!;
   }
 
